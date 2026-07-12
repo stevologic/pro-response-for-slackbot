@@ -40,10 +40,10 @@ dev = [
 all = ["anthropic>=0.40"]
 
 [project.urls]
-Homepage = "https://github.com/stevologic/openai-slackbot-pro-response"
-Documentation = "https://stevologic.github.io/openai-slackbot-pro-response/"
-Source = "https://github.com/stevologic/openai-slackbot-pro-response"
-Issues = "https://github.com/stevologic/openai-slackbot-pro-response/issues"
+Homepage = "https://github.com/stevologic/pro-response-for-slackbot"
+Documentation = "https://stevologic.github.io/pro-response-for-slackbot/"
+Source = "https://github.com/stevologic/pro-response-for-slackbot"
+Issues = "https://github.com/stevologic/pro-response-for-slackbot/issues"
 
 [project.scripts]
 proresponse = "proresponse.cli:main"

@@ -5,8 +5,8 @@ Thanks for your interest! Contributions of all sizes are welcome.
 ## Development setup
 
 ```bash
-git clone https://github.com/stevologic/openai-slackbot-pro-response.git
-cd openai-slackbot-pro-response
+git clone https://github.com/stevologic/pro-response-for-slackbot.git
+cd pro-response-for-slackbot
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[anthropic,dev]"
 ```

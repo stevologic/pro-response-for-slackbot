@@ -1,4 +1,4 @@
-# Create and configure the Pro Response Slack app
+# Create and configure Pro Response for Slackbot
 
 Pro Response runs in **Socket Mode** by default, so you don't need a public URL
 or ngrok — it opens an outbound WebSocket to Slack. The fastest path is to
@@ -12,7 +12,7 @@ create the app from the manifest below.
 
 ```yaml
 display_information:
-  name: Pro Response
+  name: Pro Response for Slackbot
   description: An AI writing assistant that polishes your messages.
 features:
   bot_user:

@@ -30,7 +30,7 @@ run:
 	proresponse-slack
 
 docker:
-	docker build -t pro-response-slackbot:2.0.0 .
+	docker build -t pro-response-for-slackbot:2.0.0 .
 
 clean:
 	rm -rf build dist *.egg-info .pytest_cache .ruff_cache htmlcov .coverage
