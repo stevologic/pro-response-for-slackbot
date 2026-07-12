@@ -41,7 +41,9 @@ Slack UX, a local CLI, and a proper Python package.
 - **Everywhere in Slack** — slash commands, a message shortcut (refine any
   message), a global compose modal, and an App Home tab with a per-user default
   tone.
-- **Socket Mode or HTTP** — run it with no public URL, or behind HTTPS.
+- **Run it your way** — as a **Slack bot**, a standalone **HTTP JSON API**, or a
+  **CLI / Python library** — one rewrite engine behind all three.
+- **Slack: Socket Mode or HTTP** — run the bot with no public URL, or behind HTTPS.
 - **Batteries included** — per-user rate limiting, a smart sanitizer that keeps
   code/links/mentions intact, a CLI, tests, CI, and Docker.
 
@@ -55,13 +57,16 @@ python -m venv .venv && source .venv/bin/activate    # Windows: .venv\Scripts\ac
 pip install -e ".[anthropic]"                        # drop [anthropic] for OpenAI-only
 
 cp .env.example .env
-# Fill in SLACK_BOT_TOKEN, SLACK_APP_TOKEN, and OPENAI_API_KEY
+# Fill in your model key (OPENAI_API_KEY) — plus, for Slack, SLACK_BOT_TOKEN + SLACK_APP_TOKEN
 
-proresponse-slack
+proresponse-slack     # run the Slack bot   (2-min setup guide below)
+# ── or ──
+proresponse-api       # run the HTTP JSON API instead — no Slack needed
 ```
 
 Creating the Slack app takes about two minutes with the provided manifest — see
 **[docs/create_and_configure_slackbot.md](docs/create_and_configure_slackbot.md)**.
+For the API, jump to [HTTP API](#-http-api) below.
 
 ## 💬 Using it in Slack
 
@@ -89,6 +94,48 @@ proresponse tones                       # list every tone
 proresponse models --provider anthropic # list known models
 ```
 
+## 🌐 HTTP API
+
+Prefer to call it from your own app or another service? Run the built-in JSON
+API — no Slack required. It only needs a model provider key.
+
+```bash
+# install (OpenAI-only is enough), then run:
+pip install -e ".[anthropic]"
+proresponse serve                 # or the console script: proresponse-api
+# → listening on http://0.0.0.0:3000  (override with --host/--port or SERVICE_IP/SERVICE_PORT)
+```
+
+| Method & path | Purpose |
+| --- | --- |
+| `GET /healthz` | Liveness check + the active provider/model. |
+| `GET /tones` | List the available tones. |
+| `POST /rewrite` | Rewrite text. Body: `{"text": "...", "tone": "friendly", "argument": null, "model": null}`. |
+
+```bash
+curl -s localhost:3000/rewrite \
+  -H 'Content-Type: application/json' \
+  -d '{"text":"hey can u fix teh report by eod","tone":"friendly"}'
+# → {"text":"Hi! Could you fix the report by end of day? Thanks 🙂",
+#     "tone":"friendly","model":"gpt-5-mini","provider":"openai","usage":{...}}
+```
+
+**Securing it:** set `PRO_API_KEY` to require `Authorization: Bearer <key>` on
+`POST /rewrite` (`/healthz` stays open). The server is dependency-free (Python
+stdlib); for heavy production traffic, put it behind a real WSGI/ASGI server or
+use the library directly (below). Errors are JSON: `400` (bad input), `401`
+(auth), `502` (provider), `404`/`405` (routing).
+
+### Or embed it as a Python library
+
+```python
+from proresponse import get_provider
+from proresponse.core import RewriteService
+
+svc = RewriteService(provider=get_provider("openai"), model="gpt-5-mini")
+print(svc.rewrite("make this friendlier pls", transform="friendly").text)
+```
+
 ## ⚙️ Configuration
 
 Everything is set via environment variables (see
@@ -103,7 +150,9 @@ Everything is set via environment variables (see
 | `PRO_BASE_URL` | — | Endpoint for `openai-compatible` hosts. |
 | `PRO_RATE_LIMIT_PER_MINUTE` | `20` | Per-user limit (`0` disables). |
 | `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` | — | Slack credentials (Socket Mode). |
-| `SLACK_MODE` | `socket` | `socket` or `http`. |
+| `SLACK_MODE` | `socket` | Slack connection mode: `socket` or `http`. |
+| `PRO_API_KEY` | — | If set, `POST /rewrite` (HTTP API) requires this bearer token. |
+| `SERVICE_IP` / `SERVICE_PORT` | `0.0.0.0` / `3000` | Bind address/port for the API and Slack HTTP mode. |
 
 ### Using an OpenAI-compatible host
 
@@ -138,6 +187,7 @@ proresponse/
 ├── ratelimit.py         # per-user token bucket
 ├── config.py            # env-driven Settings
 ├── cli.py               # `proresponse` command
+├── server.py            # dependency-free HTTP JSON API
 ├── providers/           # OpenAI · Anthropic · OpenAI-compatible
 │   ├── base.py          #   LLMProvider interface + dataclasses
 │   ├── registry.py      #   known-model catalog

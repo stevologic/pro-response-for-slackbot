@@ -81,6 +81,10 @@ class Settings:
     host: str = "0.0.0.0"
     port: int = 3000
 
+    # --- HTTP API --------------------------------------------------------
+    # Optional bearer token required by POST /rewrite when set.
+    api_key: str | None = None
+
     # --- Misc ------------------------------------------------------------
     log_level: str = "INFO"
 
@@ -122,6 +126,7 @@ class Settings:
             slack_mode=(os.getenv("SLACK_MODE") or "socket").strip().lower(),
             host=os.getenv("SERVICE_IP") or os.getenv("HOST") or "0.0.0.0",
             port=_get_int("SERVICE_PORT", _get_int("PORT", 3000)),
+            api_key=os.getenv("PRO_API_KEY"),
             log_level=(os.getenv("PRO_LOG_LEVEL") or "INFO").strip().upper(),
         )
 

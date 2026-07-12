@@ -77,7 +77,14 @@ class OpenAIProvider(LLMProvider):
             kwargs["base_url"] = self._base_url
         if self._organization:
             kwargs["organization"] = self._organization
-        self._client = OpenAI(**kwargs)
+        try:
+            self._client = OpenAI(**kwargs)
+        except Exception as exc:  # noqa: BLE001 - normalize construction errors
+            raise ProviderError(
+                "Failed to initialize the OpenAI client — is OPENAI_API_KEY set "
+                "(or a base URL for a compatible host)?",
+                cause=exc,
+            ) from exc
         return self._client
 
     def health_check(self) -> bool:

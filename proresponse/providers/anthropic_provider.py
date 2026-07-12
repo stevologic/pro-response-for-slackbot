@@ -62,7 +62,14 @@ class AnthropicProvider(LLMProvider):
             kwargs["api_key"] = self._api_key
         if self._base_url:
             kwargs["base_url"] = self._base_url
-        self._client = Anthropic(**kwargs)
+        try:
+            self._client = Anthropic(**kwargs)
+        except Exception as exc:  # noqa: BLE001 - normalize construction errors
+            raise ProviderError(
+                "Failed to initialize the Anthropic client — is "
+                "ANTHROPIC_API_KEY set?",
+                cause=exc,
+            ) from exc
         return self._client
 
     def health_check(self) -> bool:

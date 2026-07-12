@@ -48,6 +48,7 @@ Issues = "https://github.com/stevologic/pro-response/issues"
 [project.scripts]
 proresponse = "proresponse.cli:main"
 proresponse-slack = "proresponse.slack.app:main"
+proresponse-api = "proresponse.server:main"
 
 [tool.setuptools.packages.find]
 include = ["proresponse*"]

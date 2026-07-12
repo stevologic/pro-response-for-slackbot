@@ -66,6 +66,11 @@ def build_parser() -> argparse.ArgumentParser:
     # slack -------------------------------------------------------------
     sub.add_parser("slack", help="Run the Slack bot.")
 
+    # serve -------------------------------------------------------------
+    sv = sub.add_parser("serve", help="Run the HTTP JSON API.")
+    sv.add_argument("--host", default=None, help="Bind address (default from env).")
+    sv.add_argument("--port", type=int, default=None, help="Bind port (default from env).")
+
     return parser
 
 
@@ -162,6 +167,25 @@ def _cmd_slack() -> int:
     return slack_main()
 
 
+def _cmd_serve(args: argparse.Namespace) -> int:
+    import logging
+
+    from proresponse.server import serve
+
+    settings = Settings.from_env()
+    logging.basicConfig(
+        level=getattr(logging, settings.log_level, logging.INFO),
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
+    if not settings.api_key_for_provider() and settings.provider != "openai-compatible":
+        print(
+            "Warning: no API key found for provider "
+            f"'{settings.provider}'. Set the appropriate *_API_KEY.",
+            file=sys.stderr,
+        )
+    return serve(settings, host=args.host, port=args.port)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -183,6 +207,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_models(args.provider)
     if args.command == "slack":
         return _cmd_slack()
+    if args.command == "serve":
+        return _cmd_serve(args)
 
     parser.print_help()
     return 0

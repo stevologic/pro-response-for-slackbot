@@ -25,6 +25,9 @@ they go out — with a modern architecture and far more capability.
   input sanitizer that preserves punctuation, code, links, and mentions.
 - **A local CLI** (`proresponse`) for rewriting from the terminal, plus
   `proresponse-slack` to run the bot.
+- **A dependency-free HTTP JSON API** (`proresponse serve` / `proresponse-api`)
+  exposing `GET /healthz`, `GET /tones`, and `POST /rewrite`, with optional
+  `PRO_API_KEY` bearer auth — so the rewrite engine can be used without Slack.
 - Tests, GitHub Actions CI, a modern Dockerfile, Docker Compose, and a
   GitHub Pages landing site.
 

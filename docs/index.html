@@ -176,7 +176,7 @@
   <div class="wrap">
     <p class="eyebrow">Why teams like it</p>
     <h2>Polished communication, on tap</h2>
-    <p class="lead">Everything you need to make every message clearer, kinder, and more professional — right inside Slack.</p>
+    <p class="lead">Everything you need to make every message clearer, kinder, and more professional — in Slack, or anywhere via its HTTP API.</p>
     <div class="grid">
       <div class="card"><div class="ic">🎭</div><h3>14 tones, one command</h3><p>Professional, friendly, concise, formal, soften, assertive, bullets, summarize, translate, and a custom-instruction mode.</p></div>
       <div class="card"><div class="ic">🧠</div><h3>Bring any model</h3><p>OpenAI GPT-5 &amp; GPT-4.1, Anthropic Claude, or any OpenAI-compatible host — Groq, Azure, OpenRouter, Ollama.</p></div>
@@ -184,6 +184,7 @@
       <div class="card"><div class="ic">⚡</div><h3>Everywhere in Slack</h3><p>Slash commands, a right-click message shortcut, a compose modal, and an App Home tab with your default tone.</p></div>
       <div class="card"><div class="ic">🔌</div><h3>Zero-URL setup</h3><p>Runs in Socket Mode out of the box — no public endpoint, no ngrok. Or run behind HTTPS if you prefer.</p></div>
       <div class="card"><div class="ic">🛡️</div><h3>Safe by design</h3><p>Per-user rate limiting, input sanitizing that preserves code and links, and prompts hardened against injection.</p></div>
+      <div class="card"><div class="ic">🌐</div><h3>Slack bot or API</h3><p>Run it as a Slack app, or as a dependency-free HTTP JSON API (<code>POST /rewrite</code>) you can call from any app, script, or service.</p></div>
     </div>
   </div>
 </section>
@@ -232,7 +233,7 @@
     <div class="steps">
       <div class="step"><div class="n">1</div><h3>Create the Slack app</h3><p>Use the ready-made manifest to add commands, shortcuts, and the Home tab in a couple of clicks.</p></div>
       <div class="step"><div class="n">2</div><h3>Add your keys</h3><p>Copy <code>.env.example</code> to <code>.env</code> and drop in your Slack tokens and a model API key.</p></div>
-      <div class="step"><div class="n">3</div><h3>Run it</h3><p>Start the bot with a single command — Socket Mode means no public URL required.</p></div>
+      <div class="step"><div class="n">3</div><h3>Run it</h3><p>Start the Slack bot (Socket Mode — no public URL needed), or run the HTTP JSON API — one command each.</p></div>
     </div>
 <pre><span class="c"># clone &amp; install</span>
 git clone https://github.com/stevologic/pro-response.git
@@ -240,8 +241,10 @@ cd pro-response
 pip install -e ".[anthropic]"
 
 <span class="c"># configure &amp; run</span>
-cp .env.example .env   <span class="c"># add SLACK_BOT_TOKEN, SLACK_APP_TOKEN, OPENAI_API_KEY</span>
-proresponse-slack</pre>
+cp .env.example .env   <span class="c"># add OPENAI_API_KEY (+ Slack tokens for the bot)</span>
+
+proresponse-slack      <span class="c"># run the Slack bot</span>
+proresponse-api        <span class="c"># …or the HTTP JSON API instead</span></pre>
     <p class="lead" style="margin-top:26px">
       Full walkthrough → <a href="https://github.com/stevologic/pro-response/blob/main/docs/create_and_configure_slackbot.md">Slack setup guide</a>
     </p>
