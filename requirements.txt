@@ -1,4 +1,8 @@
-load_dotenv
-Flask
-slack_sdk
-openai
+# Runtime dependencies for Pro Response.
+# For editable/dev installs prefer:  pip install -e ".[anthropic,dev]"
+openai>=1.40
+slack_bolt>=1.18
+python-dotenv>=1.0
+
+# Optional: enable the Anthropic (Claude) provider.
+# anthropic>=0.40

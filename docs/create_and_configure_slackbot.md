@@ -1,37 +1,106 @@
-# Create and Configure the Pro Resposne Slackbot
-Here are the steps to create a slackbot that integrates with the script provided, using the official Slack documentation:
+# Create and configure the Pro Response Slack app
 
-1. Create a Slack workspace and a bot user for your slackbot. You can do this by following the instructions here: https://api.slack.com/authentication/basics#bot_users
+Pro Response runs in **Socket Mode** by default, so you don't need a public URL
+or ngrok — it opens an outbound WebSocket to Slack. The fastest path is to
+create the app from the manifest below.
 
-2. Set up the bot user's permissions and OAuth scopes. You will need the `channels:history`, `channels:read`, `channels:write`, `chat:write`, and `groups:history` scopes to allow the bot to read and write messages in channels and groups. You can do this by following the instructions here: https://api.slack.com/authentication/scopes-resources#available_scopes
+## 1. Create the app from a manifest
 
-3. Get the bot's `API token` and `channel ID`. You will need these to initialize the SlackAPI object in the script. You can find the `API token` in the bot user's OAuth & Permissions page, and the `channel ID` in the URL of the channel or group that you want the bot to operate in.
+1. Go to <https://api.slack.com/apps> → **Create New App** → **From an app
+   manifest**.
+2. Pick your workspace, choose **YAML**, and paste this manifest:
 
-4. Set up the OpenAI API key. You will need to sign up for an OpenAI API key and set the `OPENAI_API_KEY` environment variable to the key. You can find instructions on how to do this here: https://beta.openai.com/docs/quickstart
+```yaml
+display_information:
+  name: Pro Response
+  description: An AI writing assistant that polishes your messages.
+features:
+  bot_user:
+    display_name: Pro Response
+    always_online: true
+  app_home:
+    home_tab_enabled: true
+    messages_tab_enabled: false
+  slash_commands:
+    - command: /pro
+      description: Rewrite a message and preview it before posting
+      usage_hint: "[tone] your message"
+      should_escape: false
+    - command: /pr
+      description: Rewrite a message (alias of /pro)
+      usage_hint: "[tone] your message"
+      should_escape: false
+    - command: /prr
+      description: Get a private rewrite recommendation
+      usage_hint: "[tone] your message"
+      should_escape: false
+  shortcuts:
+    - name: "Pro Response: rewrite"
+      type: message
+      callback_id: proresponse_rewrite
+      description: Refine this message with Pro Response
+    - name: Compose with Pro Response
+      type: global
+      callback_id: proresponse_compose
+      description: Draft and refine a new message
+oauth_config:
+  scopes:
+    bot:
+      - commands
+      - chat:write
+      - chat:write.public
+settings:
+  event_subscriptions:
+    bot_events:
+      - app_home_opened
+  interactivity:
+    is_enabled: true
+  socket_mode_enabled: true
+  org_deploy_enabled: false
+  token_rotation_enabled: false
+```
 
-5. Set up the environment variables in a `.env` file. Create a `.env` file in the root of the project and add the following variables to it:
-    ```bash
-    SLACK_BOT_TOKEN=<your slack bot token>
-    SLACK_CHANNEL_ID=<your slack channel id>
-    OPENAI_API_KEY=<your openai api key>
-    SERVICE_IP=<the ip address of your server>
-    SERVICE_PORT=<the port number of your server>
-    ```
+3. Review and **Create**.
 
-6. Install the required dependencies. You can do this by running the following command:
-    ```bash
-    pip install -r requirements.txt
-    ```
+## 2. Get your tokens
 
-7. Run the script. You can run the script by using the following command:
-    ```bash
-    python main.py
-    ```
-    This will start the slackbot web service, which will listen for incoming requests to the /pr and /prr endpoints.
+- **App-level token (Socket Mode):** *Basic Information* → *App-Level Tokens* →
+  **Generate Token and Scopes**. Add the `connections:write` scope. Copy the
+  `xapp-…` value → this is `SLACK_APP_TOKEN`.
+- **Bot token:** *OAuth & Permissions* → **Install to Workspace** → copy the
+  **Bot User OAuth Token** (`xoxb-…`) → this is `SLACK_BOT_TOKEN`.
+- **Signing secret** (only needed for HTTP mode): *Basic Information* → *App
+  Credentials* → `SLACK_SIGNING_SECRET`.
 
-8. Set up the slackbot to listen for events. You can set up the slackbot to listen for events such as messages in channels or groups, or direct messages to the bot user, by using the Slack Events API. You will need to set up a request URL and register it with Slack to receive events. You can do this by following the instructions here: https://api.slack.com/events/api/getting-started
+## 3. Configure and run
 
-9. Respond to events. Once you have set up the slackbot to listen for events, you can add code to the script to handle the events and respond appropriately. You can use the Slack WebClient API to send messages, interact with the Slack API, or perform other actions in response to events. You can find more information on using the Slack WebClient API here: https://api.slack.com/client/basics
+```bash
+cp .env.example .env
+# Fill in SLACK_BOT_TOKEN, SLACK_APP_TOKEN, and OPENAI_API_KEY (or ANTHROPIC_API_KEY)
+pip install -e ".[anthropic]"
+proresponse-slack
+```
 
+You should see `Starting Pro Response in Socket Mode`. Type `/pro hello there`
+in any channel to test.
 
-> Note that you may need to modify the script to fit your specific use case. You may also need to set up a server or hosting platform to run the script, depending on your requirements.
+## 4. (Optional) HTTP mode instead of Socket Mode
+
+If you'd rather run behind a public HTTPS endpoint:
+
+1. Set `SLACK_MODE=http` and `SLACK_SIGNING_SECRET=…` in `.env`.
+2. In the manifest/app settings, disable Socket Mode and set request URLs to
+   `https://your-host/slack/events` for **Interactivity**, **Slash Commands**,
+   and **Event Subscriptions**.
+3. Run `proresponse-slack` (it binds `SERVICE_IP:SERVICE_PORT`, default
+   `0.0.0.0:3000`).
+
+## Scopes explained
+
+| Scope | Why |
+| --- | --- |
+| `commands` | Register the `/pro`, `/pr`, `/prr` slash commands. |
+| `chat:write` | Post the rewrite to a channel and send ephemeral previews. |
+| `chat:write.public` | Post to public channels the bot hasn't been added to. |
+
+The App Home tab uses the `app_home_opened` bot event (already in the manifest).

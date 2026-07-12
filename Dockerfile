@@ -1,22 +1,30 @@
-FROM python:3.8-slim
+# syntax=docker/dockerfile:1
 
-LABEL name ="slackbot-openai-pro-response" \
-      version="1.0"
+FROM python:3.12-slim AS base
 
-# Set the working directory
+LABEL org.opencontainers.image.title="pro-response-slackbot" \
+      org.opencontainers.image.description="An AI writing assistant for Slack." \
+      org.opencontainers.image.version="2.0.0" \
+      org.opencontainers.image.licenses="MIT"
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
 WORKDIR /app
 
-# Copy the requirements file
-COPY requirements.txt .
+# Install dependencies first for better layer caching.
+COPY pyproject.toml requirements.txt README.md ./
+COPY proresponse ./proresponse
 
-# Install the required packages
-RUN pip install -r requirements.txt
+# Install the package with the Anthropic provider available.
+RUN pip install --upgrade pip && pip install ".[anthropic]"
 
-# Copy the source code
-COPY src /app/src
+# Run as a non-root user.
+RUN useradd --create-home --uid 10001 appuser
+USER appuser
 
-# Copy the main script
-COPY main.py /app/main.py
+# Socket Mode needs no inbound port; expose the HTTP-mode port for convenience.
+EXPOSE 3000
 
-# Set the entry point
-ENTRYPOINT ["python", "main.py"]
+ENTRYPOINT ["proresponse-slack"]
