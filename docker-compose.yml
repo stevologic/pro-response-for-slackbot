@@ -4,7 +4,7 @@
 services:
   proresponse:
     build: .
-    image: pro-response-for-slackbot:2.0.0
+    image: pro-response:2.0.0
     restart: unless-stopped
     env_file: .env
     # Only needed when SLACK_MODE=http (Socket Mode needs no inbound port).

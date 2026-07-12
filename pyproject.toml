@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "proresponse-slackbot"
+name = "pro-response"
 version = "2.0.0"
 description = "An AI writing assistant for Slack — rewrite, refine, and reformat team messages with modern LLMs."
 readme = "README.md"
@@ -40,10 +40,10 @@ dev = [
 all = ["anthropic>=0.40"]
 
 [project.urls]
-Homepage = "https://github.com/stevologic/pro-response-for-slackbot"
-Documentation = "https://stevologic.github.io/pro-response-for-slackbot/"
-Source = "https://github.com/stevologic/pro-response-for-slackbot"
-Issues = "https://github.com/stevologic/pro-response-for-slackbot/issues"
+Homepage = "https://github.com/stevologic/pro-response"
+Documentation = "https://stevologic.github.io/pro-response/"
+Source = "https://github.com/stevologic/pro-response"
+Issues = "https://github.com/stevologic/pro-response/issues"
 
 [project.scripts]
 proresponse = "proresponse.cli:main"

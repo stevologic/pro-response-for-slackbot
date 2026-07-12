@@ -2,7 +2,7 @@
 
 FROM python:3.12-slim AS base
 
-LABEL org.opencontainers.image.title="pro-response-for-slackbot" \
+LABEL org.opencontainers.image.title="pro-response" \
       org.opencontainers.image.description="An AI writing assistant for Slack." \
       org.opencontainers.image.version="2.0.0" \
       org.opencontainers.image.licenses="MIT"

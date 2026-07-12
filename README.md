@@ -1,4 +1,4 @@
-<h1 align="center">Pro Response for Slackbot ✍️</h1>
+<h1 align="center">Pro Response ✍️</h1>
 
 <p align="center">
   <strong>An AI writing assistant for Slack.</strong><br>
@@ -6,14 +6,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/stevologic/pro-response-for-slackbot/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/stevologic/pro-response-for-slackbot/ci.yml?branch=main"></a>
+  <a href="https://github.com/stevologic/pro-response/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/stevologic/pro-response/ci.yml?branch=main"></a>
   <img alt="Python" src="https://img.shields.io/badge/python-3.9%2B-blue">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green"></a>
   <img alt="Version" src="https://img.shields.io/badge/version-2.0.0-blueviolet">
 </p>
 
 <p align="center">
-  <a href="https://stevologic.github.io/pro-response-for-slackbot/"><strong>🌐 Website</strong></a> ·
+  <a href="https://stevologic.github.io/pro-response/"><strong>🌐 Website</strong></a> ·
   <a href="docs/create_and_configure_slackbot.md">Slack setup</a> ·
   <a href="CHANGELOG.md">Changelog</a>
 </p>
@@ -48,8 +48,8 @@ Slack UX, a local CLI, and a proper Python package.
 ## 🚀 Quick start
 
 ```bash
-git clone https://github.com/stevologic/pro-response-for-slackbot.git
-cd pro-response-for-slackbot
+git clone https://github.com/stevologic/pro-response.git
+cd pro-response
 
 python -m venv .venv && source .venv/bin/activate    # Windows: .venv\Scripts\activate
 pip install -e ".[anthropic]"                        # drop [anthropic] for OpenAI-only
