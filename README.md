@@ -217,6 +217,39 @@ ruff check proresponse tests
 
 Pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## ☕ Donate
+
+Pro Response is free and MIT-licensed. If it saves you time, a tip helps keep it
+improving — thank you! 🙏
+
+<table>
+  <tr>
+    <th align="center">₿&nbsp; Bitcoin (BTC)</th>
+    <th align="center">Ð&nbsp; Dogecoin (DOGE)</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/donate/btc.png" alt="Bitcoin donation QR code" width="170"></td>
+    <td align="center"><img src="docs/donate/doge.png" alt="Dogecoin donation QR code" width="170"></td>
+  </tr>
+</table>
+
+Scan a QR code above, or copy an address below (hover the box and click the
+copy icon):
+
+**Bitcoin (BTC)**
+
+```text
+3M9PTxL15b6c8REcHMZCVPbfMomXNZ5AGR
+```
+
+**Dogecoin (DOGE)**
+
+```text
+DTW2M5oEW97WbmYJRM71qD7uE6xfJs1MUK
+```
+
+> Always confirm the address matches before sending — crypto transfers cannot be reversed.
+
 ## 📄 License
 
 [MIT](LICENSE) © 2022-2026 Stephen M Abbott

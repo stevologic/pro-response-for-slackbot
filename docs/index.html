@@ -121,6 +121,29 @@
     radial-gradient(70% 120% at 50% 0%, color-mix(in srgb,var(--brand) 16%, transparent), transparent 70%)}
   footer{border-top:1px solid var(--border); padding:34px 0; color:var(--muted); font-size:.9rem}
   footer .wrap{display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; align-items:center}
+
+  /* Donate */
+  footer .wrap.donate{display:block; padding-bottom:26px; margin-bottom:22px;
+    border-bottom:1px solid var(--border)}
+  .donate-head{text-align:center; margin-bottom:18px; color:var(--fg); font-size:1rem}
+  .coins{display:flex; gap:18px; justify-content:center; flex-wrap:wrap}
+  .coin{background:var(--bg-soft); border:1px solid var(--border); border-radius:var(--radius);
+    padding:16px; text-align:center; flex:0 1 250px}
+  .coin img{display:block; margin:0 auto 12px; width:128px; height:128px;
+    background:#fff; padding:7px; border-radius:8px}
+  .coin-name{font-weight:700; color:var(--fg); margin-bottom:9px}
+  .coin-name .tick{color:var(--muted); font-weight:600; font-size:.82rem}
+  .addr{display:block; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:.7rem; line-height:1.5; word-break:break-all; color:var(--muted);
+    background:var(--bg); border:1px solid var(--border); border-radius:8px;
+    padding:8px; margin-bottom:10px}
+  .copy{width:100%; padding:9px 12px; border-radius:9px; border:1px solid transparent;
+    cursor:pointer; font-weight:700; font-size:.9rem; color:#fff; font-family:inherit;
+    background:linear-gradient(135deg,var(--brand),var(--brand-2));
+    transition:transform .12s ease, filter .12s ease}
+  .copy:hover{transform:translateY(-1px); filter:brightness(1.08)}
+  .copy.ok{background:linear-gradient(135deg,var(--accent),var(--accent)); color:#04201f}
+  .donate-note{text-align:center; margin-top:14px; font-size:.8rem; color:var(--muted)}
 </style>
 </head>
 <body>
@@ -263,11 +286,73 @@ proresponse-api        <span class="c"># …or the HTTP JSON API instead</span><
 </section>
 
 <footer>
+  <div class="wrap donate">
+    <div class="donate-head">☕ <strong>Support Pro Response</strong> — it's free and MIT-licensed. Tips keep it improving.</div>
+    <div class="coins">
+      <div class="coin">
+        <img src="donate/btc.png" alt="Bitcoin donation QR code" width="128" height="128" loading="lazy">
+        <div class="coin-name">Bitcoin <span class="tick">BTC</span></div>
+        <code class="addr" id="addr-btc">3M9PTxL15b6c8REcHMZCVPbfMomXNZ5AGR</code>
+        <button class="copy" type="button" aria-label="Copy Bitcoin address"
+                data-addr="3M9PTxL15b6c8REcHMZCVPbfMomXNZ5AGR">Copy address</button>
+      </div>
+      <div class="coin">
+        <img src="donate/doge.png" alt="Dogecoin donation QR code" width="128" height="128" loading="lazy">
+        <div class="coin-name">Dogecoin <span class="tick">DOGE</span></div>
+        <code class="addr" id="addr-doge">DTW2M5oEW97WbmYJRM71qD7uE6xfJs1MUK</code>
+        <button class="copy" type="button" aria-label="Copy Dogecoin address"
+                data-addr="DTW2M5oEW97WbmYJRM71qD7uE6xfJs1MUK">Copy address</button>
+      </div>
+    </div>
+    <p class="donate-note">Scan a QR code or copy an address. Always confirm it matches before sending — crypto transfers cannot be reversed.</p>
+  </div>
   <div class="wrap">
     <div>✍️ <strong>Pro Response</strong> — an AI writing assistant for Slack.</div>
     <div>MIT © 2022–2026 Stephen M Abbott · <a href="https://github.com/stevologic/pro-response">GitHub</a></div>
   </div>
 </footer>
+
+<script>
+(function () {
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function flash(btn, ok) {
+    var original = btn.textContent;
+    btn.textContent = ok ? '✓ Copied!' : 'Select & copy manually';
+    btn.classList.toggle('ok', ok);
+    setTimeout(function () {
+      btn.textContent = original;
+      btn.classList.remove('ok');
+    }, 1800);
+  }
+
+  document.querySelectorAll('.copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var addr = btn.getAttribute('data-addr');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(addr).then(
+          function () { flash(btn, true); },
+          function () { flash(btn, fallbackCopy(addr)); }
+        );
+      } else {
+        flash(btn, fallbackCopy(addr));
+      }
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
