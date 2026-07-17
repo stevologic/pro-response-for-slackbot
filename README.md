@@ -121,10 +121,13 @@ curl -s localhost:3000/rewrite \
 ```
 
 **Securing it:** set `PRO_API_KEY` to require `Authorization: Bearer <key>` on
-`POST /rewrite` (`/healthz` stays open). The server is dependency-free (Python
-stdlib); for heavy production traffic, put it behind a real WSGI/ASGI server or
-use the library directly (below). Errors are JSON: `400` (bad input), `401`
-(auth), `502` (provider), `404`/`405` (routing).
+`POST /rewrite` (`/healthz` stays open). `POST /rewrite` is also rate-limited
+**per client IP** via `PRO_RATE_LIMIT_PER_MINUTE` (default 20; `0` disables;
+honors the first `X-Forwarded-For` hop behind a proxy). The server is
+dependency-free (Python stdlib); for heavy production traffic, put it behind a
+real WSGI/ASGI server or use the library directly (below). Errors are JSON:
+`400` (bad input), `401` (auth), `429` (rate limit), `502` (provider),
+`404`/`405` (routing).
 
 ### Or embed it as a Python library
 
@@ -148,7 +151,7 @@ Everything is set via environment variables (see
 | `PRO_DEFAULT_TONE` | `professional` | Fallback tone. |
 | `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` | — | Provider credential. |
 | `PRO_BASE_URL` | — | Endpoint for `openai-compatible` hosts. |
-| `PRO_RATE_LIMIT_PER_MINUTE` | `20` | Per-user limit (`0` disables). |
+| `PRO_RATE_LIMIT_PER_MINUTE` | `20` | Per-user (Slack) / per-IP (API) limit; `0` disables. |
 | `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` | — | Slack credentials (Socket Mode). |
 | `SLACK_MODE` | `socket` | Slack connection mode: `socket` or `http`. |
 | `PRO_API_KEY` | — | If set, `POST /rewrite` (HTTP API) requires this bearer token. |

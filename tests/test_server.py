@@ -21,7 +21,17 @@ def make_service(**kwargs) -> RewriteService:
     return RewriteService(provider=FakeProvider(**kwargs), model="test-model")
 
 
-def call(method, path, *, body=b"", headers=None, service=None, api_key=None):
+def call(
+    method,
+    path,
+    *,
+    body=b"",
+    headers=None,
+    service=None,
+    api_key=None,
+    limiter=None,
+    client_ip="203.0.113.7",
+):
     return process_request(
         method=method,
         path=path,
@@ -31,6 +41,8 @@ def call(method, path, *, body=b"", headers=None, service=None, api_key=None):
         default_tone="professional",
         provider_name="fake",
         api_key=api_key,
+        limiter=limiter,
+        client_ip=client_ip,
     )
 
 
@@ -118,6 +130,58 @@ def test_auth_accepts_correct_key():
 
 def test_healthz_open_without_key():
     status, _ = call("GET", "/healthz", api_key="secret")
+    assert status == 200
+
+
+def test_healthz_reports_version():
+    from proresponse import __version__
+
+    status, payload = call("GET", "/healthz")
+    assert status == 200
+    assert payload["version"] == __version__
+
+
+def test_rate_limit_enforced_per_ip():
+    from proresponse.ratelimit import RateLimiter
+
+    limiter = RateLimiter(2)  # capacity 2 per key
+    service = make_service()
+    body = json.dumps({"text": "please make this a bit nicer"}).encode()
+    assert call("POST", "/rewrite", body=body, service=service, limiter=limiter)[0] == 200
+    assert call("POST", "/rewrite", body=body, service=service, limiter=limiter)[0] == 200
+    status, payload = call("POST", "/rewrite", body=body, service=service, limiter=limiter)
+    assert status == 429
+    assert "rate limit" in payload["error"].lower()
+    # A different client IP has its own bucket.
+    status, _ = call(
+        "POST", "/rewrite", body=body, service=service, limiter=limiter,
+        client_ip="198.51.100.9",
+    )
+    assert status == 200
+
+
+def test_rate_limit_does_not_touch_get_routes():
+    from proresponse.ratelimit import RateLimiter
+
+    limiter = RateLimiter(1)
+    body = json.dumps({"text": "please make this a bit nicer"}).encode()
+    assert call("POST", "/rewrite", body=body, limiter=limiter)[0] == 200
+    # /rewrite bucket is drained, but health/tones are never limited.
+    assert call("GET", "/healthz", limiter=limiter)[0] == 200
+    assert call("GET", "/tones", limiter=limiter)[0] == 200
+
+
+def test_auth_checked_before_rate_limit():
+    from proresponse.ratelimit import RateLimiter
+
+    limiter = RateLimiter(1)
+    body = json.dumps({"text": "please make this a bit nicer"}).encode()
+    # An unauthorized caller gets 401 and must not consume a token.
+    assert call("POST", "/rewrite", body=body, limiter=limiter, api_key="s")[0] == 401
+    status, _ = call(
+        "POST", "/rewrite", body=body, limiter=limiter, api_key="s",
+        headers={"authorization": "Bearer s"},
+    )
     assert status == 200
 
 

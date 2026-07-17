@@ -12,10 +12,13 @@ Endpoints
 * ``POST /rewrite`` — ``{"text": "...", "tone": "professional",
   "argument": null, "model": null}`` → the rewritten text plus metadata.
 
-Auth
-----
+Auth & throttling
+-----------------
 If ``PRO_API_KEY`` is set, ``POST /rewrite`` requires an
 ``Authorization: Bearer <key>`` header. ``/healthz`` is always open.
+``POST /rewrite`` is also rate-limited per client IP using
+``PRO_RATE_LIMIT_PER_MINUTE`` (the same knob as the Slack bot; ``0`` disables).
+Behind a reverse proxy the first ``X-Forwarded-For`` hop identifies the client.
 
 The request handling is split into a pure :func:`process_request` function
 (easily unit-tested without sockets) and a thin :class:`BaseHTTPRequestHandler`
@@ -29,6 +32,7 @@ import logging
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from proresponse.core import ProviderError, RewriteService
+from proresponse.ratelimit import RateLimiter
 from proresponse.transforms import list_transforms
 
 log = logging.getLogger(__name__)
@@ -60,19 +64,25 @@ def process_request(
     default_tone: str,
     provider_name: str,
     api_key: str | None = None,
+    limiter: RateLimiter | None = None,
+    client_ip: str = "",
 ) -> tuple[int, dict]:
     """Handle one API request and return ``(status_code, json_payload)``.
 
     ``headers`` must be a mapping with lowercased keys. This function performs
-    no I/O, which makes it straightforward to test.
+    no I/O, which makes it straightforward to test. When ``limiter`` is given,
+    ``POST /rewrite`` is throttled per ``client_ip``.
     """
 
     # Strip any query string; normalize trailing slash.
     route = path.split("?", 1)[0].rstrip("/") or "/"
 
     if method == "GET" and route in ("/", "/healthz"):
+        from proresponse import __version__
+
         return 200, {
             "status": "ok",
+            "version": __version__,
             "provider": provider_name,
             "model": service.model,
         }
@@ -88,6 +98,11 @@ def process_request(
             auth = headers.get("authorization", "")
             if auth != f"Bearer {api_key}":
                 return 401, {"error": "Missing or invalid API key."}
+
+        if limiter is not None and not limiter.allow(client_ip or "unknown"):
+            return 429, {
+                "error": "Rate limit exceeded. Please slow down and try again."
+            }
 
         try:
             data = json.loads(body.decode("utf-8")) if body else {}
@@ -133,6 +148,7 @@ def make_handler(
     default_tone: str,
     provider_name: str,
     api_key: str | None,
+    limiter: RateLimiter | None = None,
 ):
     """Build a request-handler class bound to ``service`` and settings."""
 
@@ -142,6 +158,14 @@ def make_handler(
         # Silence the default noisy stderr logging; route through our logger.
         def log_message(self, fmt, *args):  # noqa: A003 - stdlib signature
             log.info("%s - %s", self.address_string(), fmt % args)
+
+        def _client_ip(self, lower_headers: dict[str, str]) -> str:
+            # Behind a reverse proxy the peer address is the proxy; prefer the
+            # first hop of X-Forwarded-For when present.
+            forwarded = lower_headers.get("x-forwarded-for", "")
+            if forwarded:
+                return forwarded.split(",")[0].strip()
+            return self.client_address[0] if self.client_address else "unknown"
 
         def _dispatch(self, method: str) -> None:
             try:
@@ -157,6 +181,8 @@ def make_handler(
                     default_tone=default_tone,
                     provider_name=provider_name,
                     api_key=api_key,
+                    limiter=limiter,
+                    client_ip=self._client_ip(lower_headers),
                 )
             except Exception:  # noqa: BLE001 - never crash the handler thread
                 log.exception("Unhandled error in request handler")
@@ -197,11 +223,13 @@ def serve(settings, *, host: str | None = None, port: int | None = None) -> int:
         max_output_tokens=settings.max_output_tokens,
         max_input_chars=settings.max_input_chars,
     )
+    limiter = RateLimiter(settings.rate_limit_per_minute)
     handler = make_handler(
         service,
         default_tone=settings.default_transform,
         provider_name=settings.provider,
         api_key=settings.api_key,
+        limiter=limiter if limiter.enabled else None,
     )
     bind_host = host or settings.host
     bind_port = port or settings.port
@@ -215,6 +243,11 @@ def serve(settings, *, host: str | None = None, port: int | None = None) -> int:
     )
     if settings.api_key:
         log.info("API key auth is ENABLED for POST /rewrite.")
+    if limiter.enabled:
+        log.info(
+            "Per-IP rate limit: %s requests/minute on POST /rewrite.",
+            settings.rate_limit_per_minute,
+        )
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:  # pragma: no cover - manual stop
