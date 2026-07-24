@@ -5,10 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pro Response — an AI writing assistant</title>
 <meta name="description" content="Pro Response rewrites, refines, and reformats your team's Slack messages with modern LLMs — bring your own model.">
+<link rel="canonical" href="https://stevologic.github.io/pro-response/">
+
+<!-- Link previews (Slack, iMessage, X, LinkedIn, Discord) -->
 <meta property="og:title" content="Pro Response — an AI writing assistant">
 <meta property="og:description" content="Fix grammar, change tone, translate, and summarize — preview, then post. Powered by GPT-5, Claude, and more.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%8D%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<meta property="og:url" content="https://stevologic.github.io/pro-response/">
+<meta property="og:site_name" content="Pro Response">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://stevologic.github.io/pro-response/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pro Response — sound your best in every message.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pro Response — an AI writing assistant">
+<meta name="twitter:description" content="Fix grammar, change tone, translate, and summarize — preview, then post. Powered by GPT-5, Claude, and more.">
+<meta name="twitter:image" content="https://stevologic.github.io/pro-response/og.png">
+<meta name="twitter:image:alt" content="Pro Response — sound your best in every message.">
+
+<!-- Icons. iOS home screen needs a real, opaque PNG — it ignores SVG. -->
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Pro Response">
+<meta name="application-name" content="Pro Response">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#f7f8fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0e17" media="(prefers-color-scheme: dark)">
 <style>
   :root{
     --bg:#f7f8fb; --bg-soft:#ffffff; --fg:#141824; --muted:#5a6478;
@@ -46,8 +74,7 @@
     background:color-mix(in srgb,var(--bg) 82%, transparent); border-bottom:1px solid var(--border)}
   nav .wrap{display:flex; align-items:center; justify-content:space-between; height:62px}
   .brand{display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.05rem; color:var(--fg)}
-  .brand .logo{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;
-    background:linear-gradient(135deg,var(--brand),var(--brand-2)); font-size:18px}
+  .brand .logo{width:30px;height:30px;border-radius:9px;display:block}
   .nav-links{display:flex; gap:22px; align-items:center}
   .nav-links a{color:var(--muted); font-weight:600; font-size:.95rem}
   .nav-links a:hover{color:var(--fg); text-decoration:none}
@@ -150,7 +177,7 @@
 
 <nav>
   <div class="wrap">
-    <div class="brand"><span class="logo">✍️</span> Pro Response</div>
+    <div class="brand"><img class="logo" src="favicon.svg" alt="" width="30" height="30"> Pro Response</div>
     <div class="nav-links">
       <a href="#features">Features</a>
       <a href="#tones">Tones</a>
